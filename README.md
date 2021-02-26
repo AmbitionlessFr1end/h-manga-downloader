@@ -41,7 +41,8 @@ The prerequisites needed are:
 ### Comments
 
   I know that you can already download from some or all of the websites listed, but they need you to create an account for their websites. <br>
-  I'm not a fan of that so voila! 
+  I'm not a fan of that so voila! <br>
+  I don't have any problem with account making, but personally I don't have any use for an account except for downloading files so I created this file as a result!
 
 ### Usage 
   ```bash
