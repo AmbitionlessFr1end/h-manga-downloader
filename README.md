@@ -48,4 +48,4 @@ The prerequisites needed are:
   ```bash
     $ python hnovel.py link 
   ```
-  link is the url of a novel 
+  link is the url of a h manga/doujin from the sites 
