@@ -7,17 +7,26 @@ A script that downloads h3ntai files from websites and stores them in a folder. 
 
 The prerequisites needed are:
   
-  - **rich** : Text formmating
-  
-  - **selenium** : Crawling in the js websites
-  
+  - **rich** : Text formmating 
+    ```bash
+      $ pip install rich 
+    ```
+  - **selenium** : Crawling in the js websites 
+    ```bash
+      $ pip install selenium
+    ```
   - **requests** : Calling website
-
-  - **BeautifulSoup** : Parsing requests call for crawling
-  
-  - **Re** : Regular Expressions
-
-  - **Concurrent.Futures** : Parallel tasks
+    ```bash
+      $  python -m pip install requests
+    ```
+  - **BeautifulSoup from bs4** : Parsing requests call for crawling
+    ```bash
+      $ pip install beautifulsoup4
+    ```
+  - **concurrent.futures** : Parallel tasks
+    ```bash
+      $ pip install futures
+    ```
 
 ### Websites Supported
 
@@ -28,3 +37,8 @@ The prerequisites needed are:
 ### Problems
  - Messy code
  - A bit on the slow site
+
+### Comments
+
+  I know that you can already download from some or all of the websites listed, but they need you to create an account for their websites. <br>
+  I'm not a fan of that so voila! 
