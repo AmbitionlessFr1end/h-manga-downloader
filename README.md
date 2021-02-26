@@ -36,7 +36,7 @@ The prerequisites needed are:
 
 ### Problems
  - Messy code
- - A bit on the slow site
+ - A bit on the slow side (depends on computer and network)
 
 ### Comments
 
