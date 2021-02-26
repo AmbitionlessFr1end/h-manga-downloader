@@ -13,7 +13,6 @@ import time
 import sys
 import os
 import requests
-import urllib
 import os
 import concurrent.futures
 import re
