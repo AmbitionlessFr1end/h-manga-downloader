@@ -23,7 +23,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
-
+from selenium.common.exceptions import NoSuchElementException
 # Writing nhentai files to specified folder
 def nhentai(link, i, path):
     newlink = link + str(i)
@@ -54,6 +54,12 @@ def init_selen(chromedriver):
     driver = webdriver.Chrome(chromedriver, options=chrome_options)
     return driver
 
+def checking_link(driver,xpath):
+    try:
+        driver.find_element_by_xpath(xpath)
+    except NoSuchElementException:
+        return False
+    return True
 def main():
     console = Console()
     console.print("H","Novel","Seeker", style = "bold blue", justify='center', highlight=True)
@@ -78,6 +84,10 @@ def main():
         link = link + '/'
     if nhbool:
         page = requests.get(link + '1')
+        # Checking for valid link
+        if page.status_code != 200:
+            console.print("Invalid link detected. Try again!", style = 'bold red')
+            sys.exit()
         soup = BeautifulSoup(page.content, 'html.parser')
         btnclass = soup.find('button', {'class': 'page-number btn btn-unstyled'})
         numberofpages = btnclass.find('span', {'class': 'num-pages'}).text
@@ -107,23 +117,28 @@ def main():
         end = time.time()
         print (end - start)
     elif h2rbool:
-
         page = requests.get(link)
         soup = BeautifulSoup(page.content, 'html.parser')
         a = soup.find('ol', {'class': 'breadcrumb'})
+        # Checking for valid link       
+        if a is None:
+            console.print("Invalid link detected. Try again!", style = 'bold red')
+            sys.exit()
         b = a.findAll('li')
         title = b[2].find('a').text
         title = title.replace('\n', '')
         console.log('Novel Found: ' + title)
         chaptrs = soup.find('ul', {'class': 'nav-chapters'})
+        # Checking for valid link       
+        if chaptrs is None:
+            console.print("Invalid link detected. Try again!", style = 'bold red')
+            sys.exit()
         chpttt = chaptrs.findAll('li')
-        
         for item in chpttt:
             div = item.find('div', {'class': 'media'})
             a = div.find('a', {'class': 'pull-left font-w600'}).text
             lst = re.findall('\d*\.?\d+', a)
             h2rchptrlist.append(lst[0])
-        
         curpath = sys.path[0]
         start = time.time()
         with console.status("[bold green]Scraping data...") as status:
@@ -161,6 +176,10 @@ def main():
         chromedriver = './chromedriver'
         driver = init_selen(chromedriver)
         driver.get(link)
+        # Checking for valid link
+        if (checking_link(driver,"//div[@class='image-holder']/img[@class='img-fluid']")) == False:
+            console.print("Invalid link detected. Try again!", style = 'bold red')
+            sys.exit()
         src = driver.find_element_by_xpath("//div[@class='image-holder']/img[@class='img-fluid']").get_attribute('src')
         driver.close()
         numb = 1
