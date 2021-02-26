@@ -42,3 +42,9 @@ The prerequisites needed are:
 
   I know that you can already download from some or all of the websites listed, but they need you to create an account for their websites. <br>
   I'm not a fan of that so voila! 
+
+### Usage 
+  ```bash
+    $ python hnovel.py link 
+  ```
+  link is the url of a novel 
