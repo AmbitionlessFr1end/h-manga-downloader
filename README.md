@@ -1,7 +1,7 @@
 # H Manga/Doujin Downloader
 
 
-A script that downloads h3ntai files from websites and stores them in a folder. <br>
+A script that downloads hentai files from websites and stores them in a folder. <br>
 
 ### Prerequisites/Installation
 
