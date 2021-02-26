@@ -24,3 +24,7 @@ The prerequisites needed are:
  - Hentai2Read
  - Pururin
  - Nhentai
+
+### Problems
+ - Messy code
+ - A bit on the slow site
