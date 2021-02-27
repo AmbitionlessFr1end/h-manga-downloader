@@ -33,6 +33,7 @@ The prerequisites needed are:
  - Hentai2Read
  - Pururin
  - Nhentai
+ - E-hentai
 
 ### Problems
  - Messy code
