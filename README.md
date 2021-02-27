@@ -55,4 +55,4 @@ The prerequisites needed are:
   ```
   link is the url of a h manga/doujin from the sites <br>
   
-  The files will be downloaded to the folder the script is in. For example nhentai files will be downloaded to {current location}/hnovels/Nhentai/{title of hentai}, hentai2read to {current location}/hnovels/Hentai2Read/{title of hentai} etc.
+  The files will be downloaded to the folder the script is in. For example a nhentai file will be downloaded to {current location}/hnovels/Nhentai/{title of hentai}, a hentai2read file to {current location}/hnovels/Hentai2Read/{title of hentai} etc.
