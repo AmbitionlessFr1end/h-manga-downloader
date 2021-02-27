@@ -16,6 +16,7 @@ import requests
 import os
 import concurrent.futures
 import re
+import urllib3
 from rich.console import Console
 from bs4 import BeautifulSoup
 
@@ -24,6 +25,14 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
+
+headers = {
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+    'Accept-Language': 'en-GB,en;q=0.9',
+}
 # Writing nhentai files to specified folder
 def nhentai(link, i, path):
     newlink = link + str(i)
@@ -46,7 +55,7 @@ def saving(link, path, typeof):
 # Initialize Selenium
 def init_selen(chromedriver):
     chrome_options = Options()
-    chrome_options.add_argument("--user-data-dir=chrome-data")
+    #chrome_options.add_argument("--user-data-dir=chrome-data")
     chrome_options.add_argument("--no-proxy-server")
     # chrome_options.add_argument("--proxy-server='direct://'")
     # chrome_options.add_argument("--proxy-bypass-list=*")
@@ -67,6 +76,7 @@ def main():
     nhbool = False
     h2rbool = False
     purbool = False
+    ehentbool = False
     h2rchptrlist = []
 
     if link.find('nhentai') != -1:
@@ -78,6 +88,9 @@ def main():
     elif link.find('pururin') != -1:
         console.log("Pururin Link Found!")
         purbool = True
+    elif link.find('e-hentai') != -1:
+        console.log("E-hentai Link Found!")
+        ehentbool = True
     else:
         sys.exit()
     if link[-1:] != '/':
@@ -214,7 +227,50 @@ def main():
         end = time.time()
         console.log(f'[bold][red]Done!')
         print (end - start)
-
-
+    elif ehentbool:
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        page = requests.get(link, headers=headers, verify=False)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        a = soup.find('div',{'class' : 'gm'})
+        if a is None:
+            console.print("Invalid link detected. Try again!", style = 'bold red')
+            sys.exit()
+        b = a.find('div',{'id' : 'gd2'})
+        title = b.find('h1').text
+        console.log('Novel Found: ' + title)
+        gdt = soup.find('div',{'id' : 'gdt'})
+        gdtm = gdt.find('div',{'class' : 'gdtm'})
+        next1 = gdtm.find('div')
+        #time.sleep(3)
+        newlink = next1.find('a')['href']
+        page = requests.get(newlink, headers=headers, verify=False)
+        soup = BeautifulSoup(page.content,'html.parser')
+        curpath = sys.path[0]
+        start = time.time()
+        newpath = curpath + '/hnovels' + '/E-Hentai' + '/' + title + '/'
+        numb = 1
+        if not os.path.exists(newpath):
+            os.makedirs(newpath)
+        while(True):
+            f = soup.find('div',{'id' : 'i3'})
+            a = f.find('a')
+            img = a.find('img', {'id' : 'img'})['src']
+            old = page.url
+            nextlin = a['href']
+            if old == nextlin:
+                break
+            typeof = img[-4:]
+            with console.status("[bold green]Scraping data...") as status:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                        path = newpath + '/' + str(numb)
+                        executor.submit(saving, img, path, typeof)
+                        console.log(f"[green]Scraping data[/green] {'Image ' + str(numb) + ' fetched'}")
+            page = requests.get(nextlin, headers=headers, verify=False)
+            soup = BeautifulSoup(page.content, 'html.parser')
+            #time.sleep(3)
+            numb +=1
+        end = time.time()
+        console.log(f'[bold][red]Done!')
+        print (end - start)
 if __name__ == "__main__":
     main()
