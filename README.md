@@ -27,6 +27,10 @@ The prerequisites needed are:
     ```bash
       $ pip install futures
     ```
+  - **urllib3** : Fixing ssl certification warning in e-hentai
+    ```bash
+      $ pip install urllib3
+    ```
 
 ### Websites Supported
 
