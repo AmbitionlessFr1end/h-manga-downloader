@@ -53,4 +53,6 @@ The prerequisites needed are:
   ```bash
     $ python hnovel.py link 
   ```
-  link is the url of a h manga/doujin from the sites 
+  link is the url of a h manga/doujin from the sites <br>
+  
+  The files will be downloaded to the folder the script is in. For example nhentai files will be downloaded to location/hnovels/Nhentai/, hentai2read to location/novels/Hentai2Read/ etc.
