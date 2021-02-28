@@ -6,7 +6,7 @@
     Github: https://github.com/AmbitionlessFr1end/
     Project: h-manga-downloader
     All rights reserved for this awful looking code! :P
-    Version: 1.0.0
+    Version: 1.0.2
 '''
 
 # Libraries
@@ -34,19 +34,6 @@ headers = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
     'Accept-Language': 'en-GB,en;q=0.9',
 }
-
-# Writing nhentai files to specified folder
-def nhentai(link, i, path):
-    newlink = link + str(i)
-    page = requests.get(newlink)
-    soup = BeautifulSoup(page.content, 'html.parser')
-    a = soup.find('section', {'id': 'image-container'})
-    b = a.find('a')
-    c = b.find('img')['src']
-    d = c[-4:]
-    img_bytes = requests.get(c).content
-    with open(path + d, 'wb') as img_file:
-        img_file.write(img_bytes)
 
 # Saving to folder
 def saving(link, path, typeof):
@@ -133,13 +120,19 @@ def main():
         if not os.path.exists(newpath):
             os.makedirs(newpath)
         start = time.time()
-        with console.status("[bold green]Scraping data...") as status:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as \
-                executor:
-                for i in range(1, numb + 1):
-                    path = newpath + str(i)
-                    executor.submit(nhentai, link, i, path)
-                    console.log(f"[green]Scraping data[/green] {'Image ' + str(i) + ' fetched'}")
+        for i in range(1, numb + 1):
+            newlink = link + str(i)
+            page = requests.get(newlink)
+            soup = BeautifulSoup(page.content, 'html.parser')
+            a = soup.find('section', {'id': 'image-container'})
+            b = a.find('a')
+            c = b.find('img')['src']
+            d = c[-4:]
+            path = newpath + str(i)
+            with console.status("[bold green]Scraping data...") as status:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                        executor.submit(saving, c, path, d)
+                        console.log(f"[green]Scraping data[/green] {'Image ' + str(i) + ' fetched'}")
         console.log(f'[bold][red]Done!')
         end = time.time()
         print (end - start)
@@ -172,10 +165,8 @@ def main():
             for item in h2rchptrlist:
                 numb = 1
                 newpath = curpath + '/hnovels' + '/Hentai2read' + '/' + title + '/' + item + '/'
-                
                 if not os.path.exists(newpath):
                     os.makedirs(newpath)
-                
                 while True:
                     newlink = link + item + '/' + str(numb)
                     page = requests.get(newlink)
@@ -190,7 +181,6 @@ def main():
                     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                         path = newpath + '/' + str(numb)
                         executor.submit(saving, b, path, typeof)
-
                         console.log(f"[green]Scraping data[/green] {'Image ' + str(numb) + ' fetched'}")
                     numb += 1
         end = time.time()
@@ -221,11 +211,9 @@ def main():
         console.log('Novel Found: ' + title)
         curpath = sys.path[0]
         start = time.time()
-        newpath = curpath + '/hnovels' + '/Pururin' + '/' + title + '/'
-        
+        newpath = curpath + '/hnovels' + '/Pururin' + '/' + title + '/'   
         if not os.path.exists(newpath):
             os.makedirs(newpath)
-        
         with console.status("[bold green]Scraping data...") as status:
             while True:
                 src = subs + str(numb) + typeof
@@ -237,7 +225,6 @@ def main():
                     executor.submit(saving, src, path, typeof)
                     console.log(f"[green]Scraping data[/green] {'Image ' + str(numb) + ' fetched'}")
                 numb +=1
-        
         end = time.time()
         console.log(f'[bold][red]Done!')
         print (end - start)
