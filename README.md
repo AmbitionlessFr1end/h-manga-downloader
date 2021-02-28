@@ -38,6 +38,7 @@ The prerequisites needed are:
  - Pururin
  - Nhentai
  - E-hentai
+ - Doujins
 
 ### Problems
  - Messy code
