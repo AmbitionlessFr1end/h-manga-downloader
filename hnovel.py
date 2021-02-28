@@ -136,7 +136,7 @@ def main():
         with console.status("[bold green]Scraping data...") as status:
             with concurrent.futures.ThreadPoolExecutor(max_workers=2) as \
                 executor:
-                for i in range(1, numb):
+                for i in range(1, numb + 1):
                     path = newpath + str(i)
                     executor.submit(nhentai, link, i, path)
                     console.log(f"[green]Scraping data[/green] {'Image ' + str(i) + ' fetched'}")
