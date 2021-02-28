@@ -6,6 +6,7 @@
     Github: https://github.com/AmbitionlessFr1end/
     Project: h-manga-downloader
     All rights reserved for this awful looking code! :P
+    Version: 1.0.0
 '''
 
 # Libraries
@@ -33,6 +34,7 @@ headers = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
     'Accept-Language': 'en-GB,en;q=0.9',
 }
+
 # Writing nhentai files to specified folder
 def nhentai(link, i, path):
     newlink = link + str(i)
@@ -55,20 +57,28 @@ def saving(link, path, typeof):
 # Initialize Selenium
 def init_selen(chromedriver):
     chrome_options = Options()
-    #chrome_options.add_argument("--user-data-dir=chrome-data")
-    chrome_options.add_argument("--no-proxy-server")
-    # chrome_options.add_argument("--proxy-server='direct://'")
-    # chrome_options.add_argument("--proxy-bypass-list=*")
     chrome_options.add_argument("-headless")
+    chrome_options.add_argument("--no-sandbox")
     driver = webdriver.Chrome(chromedriver, options=chrome_options)
     return driver
 
+# Initialize Selenium with no proxy
+def init_selen_with_no_proxy(chromedriver):
+    chrome_options = Options()
+    chrome_options.add_argument("--no-proxy-server")
+    chrome_options.add_argument("-headless")
+    chrome_options.add_argument("--no-sandbox")
+    driver = webdriver.Chrome(chromedriver, options=chrome_options)
+    return driver
+
+# Link Checker for Selenium stuff...
 def checking_link(driver,xpath):
     try:
         driver.find_element_by_xpath(xpath)
     except NoSuchElementException:
         return False
     return True
+
 def main():
     console = Console()
     console.print("H","Novel","Seeker", style = "bold blue", justify='center', highlight=True)
@@ -77,6 +87,7 @@ def main():
     h2rbool = False
     purbool = False
     ehentbool = False
+    doujins = False
     h2rchptrlist = []
 
     if link.find('nhentai') != -1:
@@ -91,10 +102,16 @@ def main():
     elif link.find('e-hentai') != -1:
         console.log("E-hentai Link Found!")
         ehentbool = True
+    elif link.find('doujins') != -1:
+        console.log("Doujins Link Found")
+        doujins = True
     else:
+        console.print("Unsupported Link Found",style = 'bold red')
         sys.exit()
+
     if link[-1:] != '/':
         link = link + '/'
+
     if nhbool:
         page = requests.get(link + '1')
         # Checking for valid link
@@ -113,7 +130,6 @@ def main():
         numb = int(numberofpages)
         curpath = sys.path[0]
         newpath = curpath + '/hnovels' + '/Nhentai' + '/' + title + '/'
-        
         if not os.path.exists(newpath):
             os.makedirs(newpath)
         start = time.time()
@@ -123,9 +139,7 @@ def main():
                 for i in range(1, numb):
                     path = newpath + str(i)
                     executor.submit(nhentai, link, i, path)
-
                     console.log(f"[green]Scraping data[/green] {'Image ' + str(i) + ' fetched'}")
-
         console.log(f'[bold][red]Done!')
         end = time.time()
         print (end - start)
@@ -187,7 +201,7 @@ def main():
         link = link[:33] + '01/' + link[33:]  
         link = link.replace('gallery','read')
         chromedriver = './chromedriver'
-        driver = init_selen(chromedriver)
+        driver = init_selen_with_no_proxy(chromedriver)
         driver.get(link)
         # Checking for valid link
         if (checking_link(driver,"//div[@class='image-holder']/img[@class='img-fluid']")) == False:
@@ -232,6 +246,7 @@ def main():
         page = requests.get(link, headers=headers, verify=False)
         soup = BeautifulSoup(page.content, 'html.parser')
         a = soup.find('div',{'class' : 'gm'})
+        # Checking for valid link
         if a is None:
             console.print("Invalid link detected. Try again!", style = 'bold red')
             sys.exit()
@@ -241,7 +256,6 @@ def main():
         gdt = soup.find('div',{'id' : 'gdt'})
         gdtm = gdt.find('div',{'class' : 'gdtm'})
         next1 = gdtm.find('div')
-        #time.sleep(3)
         newlink = next1.find('a')['href']
         page = requests.get(newlink, headers=headers, verify=False)
         soup = BeautifulSoup(page.content,'html.parser')
@@ -267,10 +281,49 @@ def main():
                         console.log(f"[green]Scraping data[/green] {'Image ' + str(numb) + ' fetched'}")
             page = requests.get(nextlin, headers=headers, verify=False)
             soup = BeautifulSoup(page.content, 'html.parser')
-            #time.sleep(3)
             numb +=1
         end = time.time()
         console.log(f'[bold][red]Done!')
         print (end - start)
+    elif doujins:
+        chromedriver = './chromedriver'
+        driver = init_selen(chromedriver)
+        driver.get(link)
+        if (checking_link(driver,"//div[@class='folder-title']/a[@href='#']")) == False:
+            console.print("Invalid link detected. Try again!", style = 'bold red')
+            sys.exit()
+        title = driver.find_element_by_xpath("//div[@class='folder-title']/a[@href='#']").text
+        console.log('Novel Found: ' + title)
+        a = driver.find_elements_by_xpath('//div[@class="col-12"]/div[@id="gallery"]/div[@id="thumbnails"]/div[@class="thumbnails"]/div[@class="col-6 col-sm-4 col-md-3 col-lg-2 px-1"]')
+        b = a[0].find_element_by_xpath("//div[@class='thumbnail-doujin']/a").get_attribute('href')
+        driver.get(b)
+        curpath = sys.path[0]
+        start = time.time()
+        newpath = curpath + '/hnovels' + '/Doujins' + '/' + title + '/'
+        if not os.path.exists(newpath):
+            os.makedirs(newpath)
+        c = driver.find_elements_by_xpath("//div[@id='gallery']/div[@id='images']/div")
+        d = c[0].find_elements_by_xpath("//div[@class='col-12 text-center']/div[@id='controllers']/div[@class='btn-group']")
+        e = d[0].find_element_by_xpath("//span[@id='image-counter']").text
+        pages = e[-4:].replace('/ ','')
+        pages = int(pages) + 1
+        for i in range(1,pages):
+            c = driver.find_elements_by_xpath("//div[@id='gallery']/div[@id='images']/div")
+            imgs = c[1].find_elements_by_xpath("//div[@id='image-container']/img[@id='doujinScroll']")
+            img = imgs[i-1].get_attribute('src')
+            typeof = img[37:41]   
+            with console.status("[bold green]Scraping data...") as status:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                        path = newpath + '/' + str(i)
+                        executor.submit(saving, img, path, typeof)
+                        console.log(f"[green]Scraping data[/green] {'Image ' + str(i) + ' fetched'}")
+            e = c[0].find_elements_by_xpath("//div[@class='col-12 text-center']/div[@id='controllers']/div[@class='btn-group']")
+            next1 =  e[0].find_element_by_xpath("//a[@class='btn btn-transparent image-next']").get_attribute('href')
+            driver.get(next1)
+        end = time.time()
+        console.log(f'[bold][red]Done!')
+        print (end - start) 
+        driver.close()
+
 if __name__ == "__main__":
     main()
