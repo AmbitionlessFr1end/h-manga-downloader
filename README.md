@@ -40,7 +40,8 @@ The prerequisites needed are:
  - E-hentai
  - Doujins
  - Hentai.cafe
-
+ - Tsumino
+ 
 ### Problems
  - Messy code
  - A bit on the slow side (depends on computer and network)
