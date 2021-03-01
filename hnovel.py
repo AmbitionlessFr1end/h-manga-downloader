@@ -6,7 +6,7 @@
     Github: https://github.com/AmbitionlessFr1end/
     Project: h-manga-downloader
     All rights reserved for this awful looking code! :P
-    Version: 1.0.2
+    Version: 1.0.3
 '''
 
 # Libraries
