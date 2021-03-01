@@ -23,7 +23,6 @@ from bs4 import BeautifulSoup
 
 #Selenium
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
 
@@ -76,6 +75,7 @@ def main():
     ehentbool = False
     doujins = False
     hentaicafe = False
+    tsumino = False
     h2rchptrlist = []
 
     if link.find('nhentai') != -1:
@@ -96,6 +96,9 @@ def main():
     elif link.find('hentai.cafe') != -1:
         console.log('Hentai Cafe Link Found!')
         hentaicafe = True
+    elif link.find('tsumino') != -1:
+        console.log('Tsumino Link Found!')
+        tsumino = True
     else:
         console.print("Unsupported Link Found",style = 'bold red')
         sys.exit()
@@ -332,10 +335,10 @@ def main():
         count = count[:-1]
         count = int(count.replace(' ', ''))
         curpath = sys.path[0]
-        start = time.time()
         newpath = curpath + '/hnovels' + '/HentaiCafe' + '/' + title + '/'
         if not os.path.exists(newpath):
             os.makedirs(newpath)
+        start = time.time()
         for i in range(1, count + 1):
             src = soup.find('img', {'class' : 'open'})['src']
             typeof = src[-4:]
@@ -348,5 +351,59 @@ def main():
             nextl = dd.find('a')['href']
             page = requests.get(nextl)
             soup = BeautifulSoup(page.content, 'html.parser')
+        end = time.time()
+        console.log(f'[bold][red]Done!')
+        print (end - start) 
+    elif tsumino:
+        if link.find('videos') != -1  or link.find('books') != -1:
+            console.print("Invalid link detected. Try again!", style = 'bold red')
+            sys.exit()
+        page = requests.get(link)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        if soup.find('video'): 
+            console.print("Invalid file format. Try again!", style = 'bold red')
+            sys.exit()
+        numbs = re.search(r'\d+$', link.replace('/',''))
+        if link[-7:].find('page') != -1:
+            first = link
+        elif numbs:
+            entry_id = (numbs.group())
+            first = 'https://www.tsumino.com/' + 'Read/Index/' + entry_id + '?page=1' 
+        else:
+            console.print("Invalid link detected. Try again!", style = 'bold red')
+            sys.exit()
+        chromedriver = './chromedriver'
+        driver = init_selen(chromedriver)
+        driver.get(first)
+        cururl = driver.current_url
+        if (cururl.find('AUTH') != -1):
+            console.print("Captcha in website. Authenticate and try again!", style = 'bold red')
+            sys.exit()
+        b = driver.find_element_by_xpath("//div[@id='rootContainer']/div[@class='row row-no-margin center-block reader-btn']")
+        b = driver.find_element_by_xpath('//div[@class="row row-no-margin center-block reader-btn"]/div[@class="col-md-12 col-no-padding"]/h1').text
+        pages = b[-4:].replace('f ','')
+        pages = int(pages)
+        title = driver.title
+        title = title.split('/',1)
+        title = title[0].replace('Tsumino | Read ','')
+        imgcontain = driver.find_element_by_xpath('//div[@id="image-container"]').get_attribute('data-cdn')
+        driver.close()
+        typeof = '.jpeg'
+        curpath = sys.path[0] 
+        newpath = curpath + '/hnovels' + '/Tsumino' + '/' + title + '/'
+        if not os.path.exists(newpath):
+            os.makedirs(newpath)
+        start = time.time()
+        for i in range(1, pages + 1):
+            src = imgcontain.replace('[PAGE]', str(i))
+            with console.status("[bold green]Scraping data...") as status:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                    path = newpath + '/' + str(i)
+                    executor.submit(saving, src, path, typeof)
+                    console.log(f"[green]Scraping data[/green] {'Image ' + str(i) + ' fetched'}")
+        end = time.time()
+        console.log(f'[bold][red]Done!')
+        print (end - start) 
+
 if __name__ == "__main__":
     main()      
