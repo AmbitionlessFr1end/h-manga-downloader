@@ -19,7 +19,7 @@ import concurrent.futures
 import re
 import urllib3
 from rich.console import Console
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString, Tag
 
 #Selenium
 from selenium import webdriver
@@ -75,6 +75,7 @@ def main():
     purbool = False
     ehentbool = False
     doujins = False
+    hentaicafe = False
     h2rchptrlist = []
 
     if link.find('nhentai') != -1:
@@ -90,8 +91,11 @@ def main():
         console.log("E-hentai Link Found!")
         ehentbool = True
     elif link.find('doujins') != -1:
-        console.log("Doujins Link Found")
+        console.log("Doujins Link Found!")
         doujins = True
+    elif link.find('hentai.cafe') != -1:
+        console.log('Hentai Cafe Link Found!')
+        hentaicafe = True
     else:
         console.print("Unsupported Link Found",style = 'bold red')
         sys.exit()
@@ -311,6 +315,38 @@ def main():
         console.log(f'[bold][red]Done!')
         print (end - start) 
         driver.close()
-
+    elif hentaicafe:
+        page = requests.get(link)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        a = soup.find('div', {'class' : 'x-column x-sm x-1-2 last'})
+        if a is None:
+            console.print("Invalid link detected. Try again!", style = 'bold red')
+            sys.exit()
+        title = a.find('h3').text
+        console.log('Novel Found: ' + title)
+        c = soup.find('a', {'class' : 'x-btn x-btn-flat x-btn-rounded x-btn-large'})['href']
+        page = requests.get(c)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        b = soup.find('div', {'class' : 'tbtitle dropdown_parent dropdown_right mmh'})
+        count = b.find('div').text
+        count = count[:-1]
+        count = int(count.replace(' ', ''))
+        curpath = sys.path[0]
+        start = time.time()
+        newpath = curpath + '/hnovels' + '/HentaiCafe' + '/' + title + '/'
+        if not os.path.exists(newpath):
+            os.makedirs(newpath)
+        for i in range(1, count + 1):
+            src = soup.find('img', {'class' : 'open'})['src']
+            typeof = src[-4:]
+            with console.status("[bold green]Scraping data...") as status:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                        path = newpath + '/' + str(i)
+                        executor.submit(saving, src, path, typeof)
+                        console.log(f"[green]Scraping data[/green] {'Image ' + str(i) + ' fetched'}")
+            dd = soup.find('div',{'class': 'inner'})
+            nextl = dd.find('a')['href']
+            page = requests.get(nextl)
+            soup = BeautifulSoup(page.content, 'html.parser')
 if __name__ == "__main__":
-    main()
+    main()      
