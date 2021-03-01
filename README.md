@@ -39,6 +39,7 @@ The prerequisites needed are:
  - Nhentai
  - E-hentai
  - Doujins
+ - Hentai.cafe
 
 ### Problems
  - Messy code
