@@ -19,7 +19,7 @@ import concurrent.futures
 import re
 import urllib3
 from rich.console import Console
-from bs4 import BeautifulSoup, NavigableString, Tag
+from bs4 import BeautifulSoup
 
 #Selenium
 from selenium import webdriver
