@@ -41,6 +41,7 @@ The prerequisites needed are:
  - Doujins
  - Hentai.cafe
  - Tsumino
+ - HBrowse (not working for locked chapters, may download duplicates because of the chapters list on the websites)
  
 ### Problems
  - Messy code
