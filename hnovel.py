@@ -481,5 +481,7 @@ def main():
         end = time.time()
         console.log(f'[bold][red]Done!')
         print (end - start) 
+
 if __name__ == "__main__":
     main()      
+    
