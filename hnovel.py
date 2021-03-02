@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 '''
@@ -76,6 +76,7 @@ def main():
     doujins = False
     hentaicafe = False
     tsumino = False
+    hbrowse = False
     h2rchptrlist = []
 
     if link.find('nhentai') != -1:
@@ -99,6 +100,9 @@ def main():
     elif link.find('tsumino') != -1:
         console.log('Tsumino Link Found!')
         tsumino = True
+    elif link.find('hbrowse') != -1:
+        console.log('HBrowse Link Found!')
+        hbrowse = True
     else:
         console.print("Unsupported Link Found",style = 'bold red')
         sys.exit()
@@ -164,7 +168,7 @@ def main():
         for item in chpttt:
             div = item.find('div', {'class': 'media'})
             a = div.find('a', {'class': 'pull-left font-w600'}).text
-            lst = re.findall('\d*\.?\d+', a)
+            lst = re.findall(r'\d*\.?\d+', a)
             h2rchptrlist.append(lst[0])
         curpath = sys.path[0]
         start = time.time()
@@ -403,7 +407,79 @@ def main():
                     console.log(f"[green]Scraping data[/green] {'Image ' + str(i) + ' fetched'}")
         end = time.time()
         console.log(f'[bold][red]Done!')
+        print (end - start)  
+    elif hbrowse:
+        page = requests.get(link)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        a = soup.findAll('td', {'class' : 'listMiddle'})
+        if len(a) > 1:
+            for item in a:
+                href = item.find('a')['href']
+                chptitle = item.find('a').text
+                chptitle = chptitle.replace('View ', '')
+                newlink = 'http://hbrowse.com' + href
+                page = requests.get(link)
+                soup = BeautifulSoup(page.content, 'html.parser')
+                img = soup.find('img')['src']
+                if img.find('lockedManga') != -1:
+                    console.print("Locked manga detected. Try again!", style = 'bold red')
+                    sys.exit()
+                span = soup.find('span', { 'id' : 'jsPageList'})
+                dd = span.findAll('a')
+                pages = dd[-1].text
+                pages = int(pages)
+                typeof = img[-4:]
+                title = soup.find('td', {'class' : 'listLong'}).text
+                curpath = sys.path[0] 
+                newpath = curpath + '/hnovels' + '/HBrowse' + '/' + title + '/' + chptitle + '/'
+                if not os.path.exists(newpath):
+                    os.makedirs(newpath)
+                start = time.time()
+                for i in range(1, pages + 1):
+                    src = 'http://www.hbrowse.com' + img
+                    with console.status("[bold green]Scraping data...") as status:
+                        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                            path = newpath + '/' + str(i)
+                            executor.submit(saving, src, path, typeof)
+                            console.log(f"[green]Scraping data[/green] {'Image ' + str(i) + ' fetched'}")
+                        next1 = soup.find('a', {'name' : 'next'})['href']
+                        newlink = 'http://www.hbrowse.com' + next1
+                        page = requests.get(newlink)
+                        soup = BeautifulSoup(page.content, 'html.parser')
+                        img = soup.find('img')['src']
+                end = time.time()
+                console.log(f'[bold][red]Done!')
+                print (end - start)
+            sys.exit()
+        img = soup.find('img')['src']
+        if img.find('lockedManga') != -1:
+            console.print("Locked manga detected. Try again!", style = 'bold red')
+            sys.exit()
+        span = soup.find('span', { 'id' : 'jsPageList'})
+        dd = span.findAll('a')
+        pages = dd[-1].text
+        pages = int(pages)
+        typeof = img[-4:]
+        title = soup.find('td', {'class' : 'listLong'}).text
+        curpath = sys.path[0] 
+        newpath = curpath + '/hnovels' + '/HBrowse' + '/' + title + '/'
+        if not os.path.exists(newpath):
+            os.makedirs(newpath)
+        start = time.time()
+        for i in range(1, pages + 1):
+            src = 'http://www.hbrowse.com' + img
+            with console.status("[bold green]Scraping data...") as status:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                    path = newpath + '/' + str(i)
+                    executor.submit(saving, src, path, typeof)
+                    console.log(f"[green]Scraping data[/green] {'Image ' + str(i) + ' fetched'}")
+                next1 = soup.find('a', {'name' : 'next'})['href']
+                newlink = 'http://www.hbrowse.com' + next1
+                page = requests.get(newlink)
+                soup = BeautifulSoup(page.content, 'html.parser')
+                img = soup.find('img')['src']
+        end = time.time()
+        console.log(f'[bold][red]Done!')
         print (end - start) 
-
 if __name__ == "__main__":
     main()      
