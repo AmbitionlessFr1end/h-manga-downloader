@@ -41,7 +41,7 @@ The prerequisites needed are:
  - Doujins
  - Hentai.cafe
  - Tsumino
- - HBrowse (not working for locked chapters, may download duplicates because of the chapters list on the websites. E.g. final pages chapter is the same as the chapter001 so it downloads both in different directories)
+ - HBrowse
  
 ### Problems
  - Messy code
@@ -52,7 +52,8 @@ The prerequisites needed are:
   I know that you can already download from some or all of the websites listed, but they need you to create an account for their websites. <br>
   I'm not a fan of that so voila! <br>
   I don't have any problem with account making, but personally I don't have any use for an account except for downloading files so I created this file as a result!
-
+  <br> 
+  - Added second python program for hbrowse locked chapters. It is slower than original but it works. 
 ### Usage 
   ```bash
     $ python hnovel.py link 
